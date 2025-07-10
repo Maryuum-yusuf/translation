@@ -30,7 +30,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     final url = Uri.parse('http://192.168.100.9:5000/favorites');
     final response = await http.get(url);
 
-    print('Favorites response: ${response.body}'); // Debug
+    print('Favorites response: \n${response.body}'); // Debug print
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
@@ -152,48 +152,53 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _filteredItems.isEmpty
-              ? Center(
-                  child: Text(_favorites.isEmpty
-                      ? 'No favorites yet'
-                      : 'No results found'),
-                )
-              : ListView.builder(
-                  itemCount: _filteredItems.length,
-                  itemBuilder: (context, index) {
-                    final item = _filteredItems[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: ListTile(
-                        title: Text(item.sourceText),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item.translatedText),
-                            const SizedBox(height: 4),
-                            Text(
-                              timeago.format(item.timestamp),
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () async {
-                            await deleteFavoriteById(item.id);
+      body: RefreshIndicator(
+        onRefresh: _fetchFavorites,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _filteredItems.isEmpty
+                ? Center(
+                    child: Text(_favorites.isEmpty
+                        ? 'No favorites yet'
+                        : 'No results found'),
+                  )
+                : ListView.builder(
+                    itemCount: _filteredItems.length,
+                    itemBuilder: (context, index) {
+                      final item = _filteredItems[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: ListTile(
+                          title: Text(item.sourceText),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(item.translatedText),
+                              const SizedBox(height: 4),
+                              Text(
+                                timeago.format(item.timestamp),
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async {
+                              await deleteFavoriteById(item.id);
+                            },
+                          ),
+                          onTap: () {
+                            print(
+                                'Tapped favorite: \n	xog: \n${item.sourceText} | ${item.translatedText}');
+                            Navigator.pop(context, item);
                           },
                         ),
-                        onTap: () {
-                          Navigator.pop(context, item);
-                        },
-                      ),
-                    );
-                  },
-                ),
+                      );
+                    },
+                  ),
+      ),
     );
   }
 }

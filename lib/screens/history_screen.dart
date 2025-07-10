@@ -124,65 +124,70 @@ class _HistoryScreenState extends State<HistoryScreen> {
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _filteredItems.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.history, size: 64, color: Colors.grey),
-                      const SizedBox(height: 16),
-                      Text(
-                        _allItems.isEmpty
-                            ? 'No history yet'
-                            : 'No results found',
-                        style:
-                            const TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    ],
+      body: RefreshIndicator(
+        onRefresh: _fetchHistory,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _filteredItems.isEmpty
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.history, size: 64, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        Text(
+                          _allItems.isEmpty
+                              ? 'No history yet'
+                              : 'No results found',
+                          style:
+                              const TextStyle(fontSize: 18, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _filteredItems.length,
+                    itemBuilder: (context, index) {
+                      final item = _filteredItems[index];
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: ListTile(
+                          title: Text(item.sourceText),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(item.translatedText),
+                              const SizedBox(height: 4),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _formatTimestamp(item.timestamp),
+                                style: const TextStyle(
+                                    fontSize: 12, color: Colors.grey),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  await deleteHistoryItem(item.id);
+                                  _fetchHistory(); // dib u load garee
+                                },
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            print(
+                                'Tapped history: \n	xog: \n${item.sourceText} | ${item.translatedText}');
+                            Navigator.pop(context, item);
+                          },
+                        ),
+                      );
+                    },
                   ),
-                )
-              : ListView.builder(
-                  itemCount: _filteredItems.length,
-                  itemBuilder: (context, index) {
-                    final item = _filteredItems[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: ListTile(
-                        title: Text(item.sourceText),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item.translatedText),
-                            const SizedBox(height: 4),
-                          ],
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _formatTimestamp(item.timestamp),
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey),
-                            ),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                await deleteHistoryItem(item.id);
-                                _fetchHistory(); // dib u load garee
-                              },
-                            ),
-                          ],
-                        ),
-                        onTap: () {
-                          Navigator.pop(context, item);
-                        },
-                      ),
-                    );
-                  },
-                ),
+      ),
     );
   }
 
@@ -202,6 +207,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Future<List<TranslationItem>> fetchHistory() async {
     final url = Uri.parse('http://192.168.100.9:5000/history');
     final response = await http.get(url);
+    print('History response: \n${response.body}'); // Debug print
 
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);

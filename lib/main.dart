@@ -86,10 +86,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
       ),
     );
     if (result != null && result is TranslationItem) {
-      setState(() {
-        textController.text = result.sourceText;
-        translatedText = result.translatedText;
-      });
+      _setFromItem(result);
     }
   }
 
@@ -102,10 +99,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
       ),
     );
     if (result != null && result is TranslationItem) {
-      setState(() {
-        textController.text = result.sourceText;
-        translatedText = result.translatedText;
-      });
+      _setFromItem(result);
     }
   }
 
@@ -126,6 +120,16 @@ class _TranslationScreenState extends State<TranslationScreen> {
         ),
       ),
     );
+  }
+
+  void _setFromItem(TranslationItem item) {
+    print('Selected item: \n${item.sourceText} | ${item.translatedText}');
+    textController.removeListener(_onTextChanged);
+    setState(() {
+      textController.text = item.sourceText;
+      translatedText = item.translatedText;
+    });
+    textController.addListener(_onTextChanged);
   }
 
   @override
@@ -172,7 +176,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
     });
   }
 
-  void _translateText() async {
+  Future<void> _translateText() async {
     final inputText = textController.text.trim();
     if (inputText.isEmpty) return;
 
@@ -200,43 +204,49 @@ class _TranslationScreenState extends State<TranslationScreen> {
           final data = json.decode(response.body);
           print('Decoded data: $data'); // Debug print
 
-          setState(() {
-            if (data != null) {
-              // Check all possible response formats
-              if (data is Map) {
-                translatedText = data['translated_text'] ??
-                    data['translation'] ??
-                    data['result'] ??
-                    data['text'] ??
-                    data.toString();
-              } else if (data is String) {
-                translatedText = data;
-              } else {
-                translatedText = data.toString();
-              }
-
-              String idFromServer = data['id'] ?? data['_id'] ?? '';
-
-              if (translatedText.isEmpty) {
-                translatedText = 'Error: Empty translation received';
-              }
-
-              if (translatedText != 'Error: Empty translation received' &&
-                  idFromServer.isNotEmpty) {
-                final newItem = TranslationItem(
-                  id: idFromServer, // ✅ Store the MongoDB ID here
-                  sourceText: inputText,
-                  translatedText: translatedText,
-                  timestamp: DateTime.now(),
-                  isFavorite: false,
-                );
-                historyItems.insert(0, newItem);
-                isFavorite = false;
-              }
+          String idFromServer = '';
+          String tempTranslatedText = '';
+          if (data != null) {
+            if (data is Map) {
+              tempTranslatedText = data['translated_text'] ??
+                  data['translation'] ??
+                  data['result'] ??
+                  data['text'] ??
+                  data.toString();
+              idFromServer = data['id'] ?? data['_id'] ?? '';
+            } else if (data is String) {
+              tempTranslatedText = data;
             } else {
-              translatedText = 'Error: Invalid response from server';
+              tempTranslatedText = data.toString();
+            }
+          }
+          if (tempTranslatedText.isEmpty) {
+            tempTranslatedText = 'Error: Empty translation received';
+          }
+          setState(() {
+            translatedText = tempTranslatedText;
+            if (translatedText != 'Error: Empty translation received' &&
+                idFromServer.isNotEmpty) {
+              final newItem = TranslationItem(
+                id: idFromServer, // ✅ Store the MongoDB ID here
+                sourceText: inputText,
+                translatedText: translatedText,
+                timestamp: DateTime.now(),
+                isFavorite: false,
+              );
+              historyItems.insert(0, newItem);
+              isFavorite = false;
             }
           });
+          // Save to backend history with both fields (outside setState)
+          if (tempTranslatedText != 'Error: Empty translation received' &&
+              idFromServer.isNotEmpty) {
+            await saveToHistoryBackend(
+              originalText: inputText,
+              translatedText: tempTranslatedText,
+              isFavorite: false,
+            );
+          }
         } catch (e) {
           print('JSON decode error: $e');
           setState(() {
@@ -479,7 +489,9 @@ class _TranslationScreenState extends State<TranslationScreen> {
                   const SizedBox(width: 16),
                   _buildCircularButton(
                     Icons.send,
-                    _translateText,
+                    () async {
+                      await _translateText();
+                    },
                   ),
                 ],
               ),
@@ -571,5 +583,25 @@ class _TranslationScreenState extends State<TranslationScreen> {
         onPressed: onPressed,
       ),
     );
+  }
+
+  Future<void> saveToHistoryBackend({
+    required String originalText,
+    required String translatedText,
+    required bool isFavorite,
+  }) async {
+    final url = Uri.parse('http://192.168.100.9:5000/history');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'original_text': originalText,
+        'translated_text': translatedText,
+        'is_favorite': isFavorite,
+      }),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to save item to backend history');
+    }
   }
 }
