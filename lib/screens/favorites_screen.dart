@@ -3,7 +3,7 @@ import '../models/translation_item.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:timeago/timeago.dart' as timeago;
-import 'package:http_parser/http_parser.dart';
+// import 'package:http_parser/http_parser.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});

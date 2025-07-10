@@ -77,29 +77,6 @@ class _TranslationScreenState extends State<TranslationScreen> {
   // Mock data for history and favorites
   final List<TranslationItem> historyItems = [];
   final List<TranslationItem> favoriteItems = [];
-
-  void _addToHistory(String sourceText, String translatedText) {
-    if (sourceText.isEmpty) return;
-
-    final newItem = TranslationItem(
-      id: '', // Local item, no DB id
-      sourceText: sourceText,
-      translatedText: translatedText,
-      timestamp: DateTime.now(),
-      isFavorite: false,
-    );
-
-    setState(() {
-      // Add new item to the beginning of the list
-      historyItems.insert(0, newItem);
-
-      // Keep only the last 5 items
-      if (historyItems.length > 5) {
-        historyItems.removeRange(5, historyItems.length);
-      }
-    });
-  }
-
   void _navigateToFavorites() {
     Navigator.pop(context); // Close drawer
     Navigator.push(
