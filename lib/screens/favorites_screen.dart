@@ -187,6 +187,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             await deleteFavoriteById(item.id);
                           },
                         ),
+                        onTap: () {
+                          Navigator.pop(context, item);
+                        },
                       ),
                     );
                   },

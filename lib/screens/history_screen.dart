@@ -176,6 +176,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             ),
                           ],
                         ),
+                        onTap: () {
+                          Navigator.pop(context, item);
+                        },
                       ),
                     );
                   },

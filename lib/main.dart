@@ -77,23 +77,36 @@ class _TranslationScreenState extends State<TranslationScreen> {
   // Mock data for history and favorites
   final List<TranslationItem> historyItems = [];
   final List<TranslationItem> favoriteItems = [];
-  void _navigateToFavorites() {
+  void _navigateToFavorites() async {
     Navigator.pop(context); // Close drawer
-    Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FavoritesScreen(), // No parameters needed
-        ));
-  }
-
-  void _navigateToHistory() {
-    Navigator.pop(context); // Close drawer
-    Navigator.push(
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => HistoryScreen(), // No parameters needed
+        builder: (context) => FavoritesScreen(),
       ),
     );
+    if (result != null && result is TranslationItem) {
+      setState(() {
+        textController.text = result.sourceText;
+        translatedText = result.translatedText;
+      });
+    }
+  }
+
+  void _navigateToHistory() async {
+    Navigator.pop(context); // Close drawer
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HistoryScreen(),
+      ),
+    );
+    if (result != null && result is TranslationItem) {
+      setState(() {
+        textController.text = result.sourceText;
+        translatedText = result.translatedText;
+      });
+    }
   }
 
   void _navigateToSettings() {
