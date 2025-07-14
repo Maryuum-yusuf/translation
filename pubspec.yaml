@@ -40,6 +40,7 @@ dependencies:
   share_plus: ^7.2.1
   cloud_firestore: ^5.6.6
   timeago: ^3.6.0
+  speech_to_text: ^7.1.0
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +52,12 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/somali_to_english.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

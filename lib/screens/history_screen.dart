@@ -238,20 +238,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> _fetchHistory() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
     try {
       final items = await fetchHistory();
-      setState(() {
-        _allItems = items;
-        _filteredItems = items;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _allItems = items;
+          _filteredItems = items;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 }

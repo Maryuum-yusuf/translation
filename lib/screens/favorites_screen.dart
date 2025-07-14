@@ -53,20 +53,25 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<void> _fetchFavorites() async {
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
     });
     try {
       final items = await fetchFavorites();
-      setState(() {
-        _favorites = items;
-        _filteredItems = items;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _favorites = items;
+          _filteredItems = items;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
