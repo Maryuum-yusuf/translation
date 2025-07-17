@@ -14,12 +14,14 @@ class TranslationScreen extends StatefulWidget {
   final Function toggleTheme;
   final bool isDarkMode;
   final VoidCallback? openDrawer;
+  final double textSize;
 
   const TranslationScreen({
     super.key,
     required this.toggleTheme,
     required this.isDarkMode,
     this.openDrawer,
+    required this.textSize,
   });
 
   @override
@@ -32,7 +34,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
   TextEditingController textController = TextEditingController();
   String translatedText = '';
   bool isFavorite = false;
-  double _textSize = 16.0;
+  late double _textSize;
   final FocusNode _textFieldFocusNode = FocusNode();
 
   late stt.SpeechToText _speech;
@@ -46,8 +48,19 @@ class _TranslationScreenState extends State<TranslationScreen> {
     super.initState();
     _speech = stt.SpeechToText();
     textController.addListener(_onTextChanged);
+    _textSize = widget.textSize;
     _loadTextSize();
     _checkKeyboardPreference();
+  }
+
+  @override
+  void didUpdateWidget(covariant TranslationScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.textSize != oldWidget.textSize) {
+      setState(() {
+        _textSize = widget.textSize;
+      });
+    }
   }
 
   @override
@@ -67,7 +80,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
   Future<void> _loadTextSize() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _textSize = prefs.getDouble('text_size') ?? 16.0;
+      _textSize = prefs.getDouble('text_size') ?? widget.textSize;
     });
   }
 

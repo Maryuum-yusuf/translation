@@ -7,9 +7,16 @@ import 'setting_screen.dart';
 class HomeScreen extends StatefulWidget {
   final Function toggleTheme;
   final bool isDarkMode;
+  final double textSize;
+  final Function(double) onTextSizeChanged;
 
-  const HomeScreen(
-      {super.key, required this.toggleTheme, required this.isDarkMode});
+  const HomeScreen({
+    super.key,
+    required this.toggleTheme,
+    required this.isDarkMode,
+    required this.textSize,
+    required this.onTextSizeChanged,
+  });
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -41,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
             settingsItems: const [],
             toggleTheme: widget.toggleTheme,
             isDarkMode: widget.isDarkMode,
-            onTextSizeChanged: (double newSize) {},
+            onTextSizeChanged: widget.onTextSizeChanged,
           ),
         ),
       );
@@ -114,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
         toggleTheme: widget.toggleTheme,
         isDarkMode: widget.isDarkMode,
         openDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+        textSize: widget.textSize,
       ),
     );
   }
