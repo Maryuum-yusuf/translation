@@ -27,7 +27,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<List<TranslationItem>> fetchFavorites() async {
-    final url = Uri.parse('http://192.168.100.9:5000/favorites');
+    final url = Uri.parse('http://192.168.35.8:5000/favorites');
     final response = await http.get(url);
 
     print('Favorites response: \n${response.body}'); // Debug print
@@ -87,7 +87,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<void> deleteFavoriteById(String id) async {
-    final url = Uri.parse('http://192.168.100.9:5000/favorites/$id');
+    final url = Uri.parse('http://192.168.35.8:5000/favorites/$id');
     final response = await http.delete(url);
     if (response.statusCode != 200) {
       throw Exception('Failed to delete favorite');
@@ -96,7 +96,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   Future<void> deleteAllFavorites() async {
-    final url = Uri.parse('http://192.168.100.9:5000/favorites');
+    final url = Uri.parse('http://192.168.35.8:5000/favorites');
     final response = await http.delete(url);
     if (response.statusCode != 200) {
       throw Exception('Failed to delete all favorites');

@@ -108,9 +108,12 @@ class _TranslationScreenState extends State<TranslationScreen> {
         translatedText = 'Translating...';
       });
     }
+
+    // Somali to English: use existing model
     final url = Uri.parse(
       'https://translate.googleapis.com/translate_a/single?client=gtx&sl=so&tl=en&dt=t&q=${Uri.encodeComponent(text)}',
     );
+
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -145,7 +148,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
         if (mounted) {
           setState(() {
             translatedText =
-                'Translation failed - Status: ${response.statusCode}';
+                'Translation failed - Status:  {response.statusCode}';
           });
         }
       }
@@ -166,7 +169,9 @@ class _TranslationScreenState extends State<TranslationScreen> {
         translatedText = 'Translating...';
       });
     }
-    final url = Uri.parse('http://192.168.100.9:5000/translate');
+
+    // Somali to English
+    final url = Uri.parse('http://192.168.35.8:5000/translate');
     try {
       final response = await http.post(
         url,
@@ -274,7 +279,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
   }
 
   Future<void> markAsFavorite(String id) async {
-    final url = Uri.parse('http://192.168.100.9:5000/favorite');
+    final url = Uri.parse('http://192.168.35.8:5000/favorite');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -300,6 +305,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
         isFavorite: true,
       ),
     );
+
     if (match.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -341,6 +347,8 @@ class _TranslationScreenState extends State<TranslationScreen> {
   }
 
   void _startListening() async {
+    // Set locale for Somali to English translation
+    String localeId = 'so-SO';
     bool available = await _speech.initialize(
       onStatus: (val) {
         if (val == 'done' || val == 'notListening') {
@@ -366,7 +374,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
     if (available) {
       setState(() => _isListening = true);
       _speech.listen(
-        localeId: 'so-SO',
+        localeId: localeId,
         listenMode: stt.ListenMode.dictation,
         onResult: (val) {
           if (mounted) {
@@ -457,7 +465,7 @@ class _TranslationScreenState extends State<TranslationScreen> {
     required String translatedText,
     required bool isFavorite,
   }) async {
-    final url = Uri.parse('http://192.168.100.9:5000/history');
+    final url = Uri.parse('http://192.168.35.8:5000/history');
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
@@ -470,6 +478,24 @@ class _TranslationScreenState extends State<TranslationScreen> {
     if (response.statusCode != 200) {
       throw Exception('Failed to save item to backend history');
     }
+  }
+
+  // Helper to fetch latest history item ID from backend
+  Future<String?> fetchLatestHistoryId(String source, String translated) async {
+    final url = Uri.parse('http://192.168.35.8:5000/history');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        for (var item in data) {
+          if (item['original_text'] == source &&
+              item['translated_text'] == translated) {
+            return item['_id'] ?? item['id'];
+          }
+        }
+      }
+    } catch (e) {}
+    return null;
   }
 }
 

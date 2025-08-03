@@ -63,7 +63,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       },
     );
     if (confirmed == true) {
-      final url = Uri.parse('http://192.168.100.9:5000/history');
+      final url = Uri.parse('http://192.168.35.8:5000/history');
       final response = await http.delete(url);
       if (response.statusCode == 200) {
         _fetchHistory(); // Dib u soo celi history-ga cusub
@@ -205,7 +205,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<List<TranslationItem>> fetchHistory() async {
-    final url = Uri.parse('http://192.168.100.9:5000/history');
+    final url = Uri.parse('http://192.168.35.8:5000/history');
     final response = await http.get(url);
     print('History response: \n${response.body}'); // Debug print
 
@@ -222,7 +222,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> deleteAllHistory() async {
-    final url = Uri.parse('http://192.168.100.9:5000/history');
+    final url = Uri.parse('http://192.168.35.8:5000/history');
     final response = await http.delete(url);
     if (response.statusCode != 200) {
       throw Exception('Failed to delete all history');
@@ -230,7 +230,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   Future<void> deleteHistoryItem(String id) async {
-    final url = Uri.parse('http://192.168.100.9:5000/history/$id');
+    final url = Uri.parse('http://192.168.35.8:5000/history/$id');
     final response = await http.delete(url);
     if (response.statusCode != 200) {
       throw Exception('Failed to delete history item');
