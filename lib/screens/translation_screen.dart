@@ -526,7 +526,7 @@ class LanguageSelector extends StatelessWidget {
             style: const TextStyle(color: Colors.white),
           ),
           IconButton(
-            icon: const Icon(Icons.swap_horiz, color: Colors.white),
+            icon: const Icon(Icons.arrow_forward, color: Colors.white),
             onPressed: onSwap,
           ),
           Text(
